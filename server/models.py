@@ -2,7 +2,7 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
-from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy_serializer import SerializerMixin as sn
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -17,8 +17,10 @@ metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(metadata=metadata)
 
 
-class Zookeeper(db.Model):
+class Zookeeper(db.Model, sn):
     __tablename__ = 'zookeepers'
+
+    serialize_rules = ('-animals.zookeeper',)
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
@@ -27,8 +29,10 @@ class Zookeeper(db.Model):
     animals = db.relationship('Animal', back_populates='zookeeper')
 
 
-class Enclosure(db.Model):
+class Enclosure(db.Model, sn):
     __tablename__ = 'enclosures'
+
+    serialize_rules = ('-animals.enclosure',)
 
     id = db.Column(db.Integer, primary_key=True)
     environment = db.Column(db.String)
@@ -37,8 +41,10 @@ class Enclosure(db.Model):
     animals = db.relationship('Animal', back_populates='enclosure')
 
 
-class Animal(db.Model):
+class Animal(db.Model, sn):
     __tablename__ = 'animals'
+
+    serialize_rules = ('-zookeeper.animals', '-enclosure.animals')
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
